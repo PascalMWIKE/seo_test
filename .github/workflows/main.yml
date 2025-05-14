@@ -33,8 +33,6 @@ jobs:
 
     - name: Run gsc_to_sqlite
       run: python gsc_to_sqlite.py
-      env:
-        GSC_JSON: ${{ secrets.GSC_JSON }}
 
     - name: 🧪 Run report.py (generate PDF)
       run: python report.py
