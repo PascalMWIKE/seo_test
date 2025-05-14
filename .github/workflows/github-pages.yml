@@ -18,6 +18,14 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Setup Git config
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        
+    - name: Check for changes
+      run: |
+        git status
 
     - name: Setup Pages
       uses: actions/configure-pages@v2
@@ -26,9 +34,8 @@ jobs:
       run: |
         cp -r * .github/workflows/pages/* 
         echo "deploying to pages"
-        # Stelle sicher, dass du den korrekten Ordner für GitHub Pages setzt.
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
         git add .
-        git commit -m "Update Pages" || echo "Nothing to commit"
-        git push
+        git commit -m "Automated SEO report and index update" || echo "Nothing to commit"
+        git push https://github.com/${{ github.repository }}.git HEAD:main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
