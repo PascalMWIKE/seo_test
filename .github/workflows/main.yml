@@ -27,6 +27,10 @@ jobs:
     - name: Print start of GSC_JSON (debug)
       run: echo "${{ secrets.GSC_JSON }}" | cut -c1-100
 
+    - name: Write credentials to file
+      run: |
+        echo "${{ secrets.GSC_JSON }}" > creds.json
+
     - name: Run gsc_to_sqlite
       run: python gsc_to_sqlite.py
       env:
