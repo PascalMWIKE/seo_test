@@ -8,7 +8,7 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
 # --- Credentials aus Umgebungsvariable laden
-creds_json = os.getenv('GSC_JSON')
+creds_json = os.getenv(GSC_JSON)
 creds_dict = json.loads(creds_json)
 creds = service_account.Credentials.from_service_account_info(creds_dict, scopes=["https://www.googleapis.com/auth/webmasters.readonly"])
 
