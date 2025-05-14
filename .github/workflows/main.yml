@@ -24,6 +24,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Print start of GSC_JSON (debug)
+      run: echo "${{ secrets.GSC_JSON }}" | cut -c1-100
+
     - name: Run GSC Data and Store in SQLite
       run: |
         python gsc_to_sqlite.py
