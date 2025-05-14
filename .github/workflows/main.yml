@@ -10,6 +10,9 @@ jobs:
     steps:
     - name: 📥 Checkout repository
       uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
 
     - name: 🐍 Set up Python
       uses: actions/setup-python@v4
@@ -34,3 +37,5 @@ jobs:
         git add reports/ index.html
         git commit -m "Automated SEO report and index update" || echo "Nothing to commit"
         git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
