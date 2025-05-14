@@ -16,26 +16,26 @@ html_content = """
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SEO Reports Übersicht</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; color: #333; padding: 20px; }
-        h1 { text-align: center; color: #4CAF50; }
+        body { font-family: monospace; background-color: #1e1e1e; color: #e0e0e0; padding: 20px; }
+        h1 { text-align: center; color: #00ff99; }
         ul { list-style-type: none; padding: 0; }
-        li { background-color: #fff; margin: 10px 0; padding: 10px; border-radius: 5px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
-        li a { text-decoration: none; color: #2196F3; font-weight: bold; }
-        li:hover { background-color: #e1f5fe; }
-        .footer { text-align: center; font-size: 12px; color: #aaa; margin-top: 20px; }
+        li { background-color: #2e2e2e; margin: 10px 0; padding: 10px; border-radius: 8px; }
+        li a { text-decoration: none; color: #00ccff; font-weight: bold; }
+        li:hover { background-color: #3e3e3e; }
+        .footer { text-align: center; font-size: 12px; color: #888; margin-top: 20px; }
     </style>
 </head>
 <body>
     <h1>SEO Reports Übersicht</h1>
-    <p>Automatisch generierte SEO-Berichte. Einfach auf einen Bericht klicken, um ihn herunterzuladen.</p>
+    <p>Hier findest du automatisch generierte SEO-Reports zum Herunterladen.</p>
     <ul>
 """
 
 # Loop durch das Verzeichnis und finde alle PDF-Berichte
-for filename in os.listdir(reports_dir):
+for filename in sorted(os.listdir(reports_dir), reverse=True):
     if filename.endswith(".pdf"):
         report_date = filename.replace("seo_report_", "").replace(".pdf", "")
-        html_content += f'<li><a href="https://[DEIN-GITHUB-NAME].github.io/[DEIN-REPO]/{reports_dir}/{filename}">SEO Report vom {report_date}</a></li>\n'
+        html_content += f'<li><a href="{reports_dir}/{filename}" download>SEO Report vom {report_date} (Download)</a></li>\n'
 
 # HTML-Footer
 html_content += """
