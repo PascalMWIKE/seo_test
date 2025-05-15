@@ -3,9 +3,12 @@ import json
 import sqlite3
 import datetime
 import pandas as pd
+import os
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
+
+print("Starte Skript in:", os.getcwd())
 
 # Verwende die Datei direkt
 creds = service_account.Credentials.from_service_account_file("creds.json")
@@ -63,3 +66,5 @@ conn.commit()
 conn.close()
 
 print(f"{len(data)} Zeilen erfolgreich upserted.")
+print("DB-Pfad:", os.path.abspath('seo_data.db'))
+print(f"{len(df)} Zeilen erfolgreich gespeichert.")
