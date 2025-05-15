@@ -38,6 +38,9 @@ jobs:
     - name: Run gsc_to_sqlite.py
       run: python gsc_to_sqlite.py
 
+    - name: 🐞 Debug Print DB contents
+      run: python debug_db.py
+
     - name: 🧪 Run report.py (generate PDF)
       run: python report.py
 
