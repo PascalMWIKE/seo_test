@@ -1,112 +1,11 @@
 <!DOCTYPE html>
-<html lang="de">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SEO Reports</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f9f9f9;
-            color: #333;
-        }
-        header {
-            background-color: #222;
-            color: white;
-            padding: 1rem;
-            text-align: center;
-        }
-        main {
-            max-width: 960px;
-            margin: 2rem auto;
-            padding: 1rem;
-        }
-        iframe {
-            width: 100%;
-            height: 800px;
-            border: none;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        ul {
-            list-style: none;
-            padding: 0;
-        }
-        li {
-            margin: 0.5rem 0;
-        }
-        a {
-            color: #007acc;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        footer {
-            margin-top: 3rem;
-            padding: 2rem;
-            text-align: center;
-            position: relative;
-            background: #eee;
-            font-size: 0.8rem;
-        }
-        /* Dino Game */
-        #dino {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            width: 200px;
-            height: 60px;
-            background: white;
-            border: 1px solid #ccc;
-            overflow: hidden;
-        }
-        .gator {
-            position: absolute;
-            bottom: 0;
-            left: 10px;
-            width: 40px;
-            height: 40px;
-            background: black;
-            clip-path: polygon(0 100%, 100% 100%, 100% 60%, 80% 60%, 80% 20%, 60% 20%, 60% 0, 40% 0, 40% 20%, 20% 20%, 20% 60%, 0 60%);
-        }
-        .letter {
-            position: absolute;
-            font-weight: bold;
-            color: black;
-            animation: fly 5s linear infinite;
-        }
-        @keyframes fly {
-            0% { left: 100%; top: 10px; }
-            100% { left: -20px; top: 50px; }
-        }
-    </style>
+    <meta charset="utf-8">
+    <title>SEO Report</title>
 </head>
 <body>
-    <header>
-        <h1>SEO Dashboard</h1>
-        <p>Aktuellster Bericht eingebettet, ältere zum Download</p>
-    </header>
-    <main>
-        <h2>Neuester SEO-Bericht</h2>
-        <iframe src="{{LATEST_PDF}}"></iframe>
-
-        <h2>Alle Berichte herunterladen</h2>
-        <ul>
-            {{PDF_LIST}}
-        </ul>
-    </main>
-    <footer>
-        <div id="dino">
-            <div class="gator"></div>
-            <div class="letter" style="animation-delay: 0s">P</div>
-            <div class="letter" style="animation-delay: 1s">P</div>
-            <div class="letter" style="animation-delay: 2s">S</div>
-            <div class="letter" style="animation-delay: 3s">E</div>
-            <div class="letter" style="animation-delay: 4s">O</div>
-        </div>
-        <p>© 2025 SEO Reports</p>
-    </footer>
+    <h1>SEO Report</h1>
+    <p>This is a dummy SEO report generated on {{ date }}.</p>
 </body>
 </html>
