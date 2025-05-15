@@ -40,6 +40,21 @@ jobs:
     - name: 🛠️ Run generate_html.py (update index.html)
       run: python generate_html.py
 
+    - name: 🐍 Run gsc_to_sqlite.py and check DB
+      run: |
+        python gsc_to_sqlite.py
+        echo "Files in current directory:"
+        ls -la
+        echo "Check for DB file:"
+        if [ -f seo_data.db ]; then
+          echo "DB file exists!"
+          ls -lh seo_data.db
+          realpath seo_data.db
+        else
+          echo "DB file not found!"
+          find . -name "seo_data.db"
+        fi
+
     - name: ✅ Commit new files (report + index)
       run: |
         git config --global user.name "github-actions[bot]"
