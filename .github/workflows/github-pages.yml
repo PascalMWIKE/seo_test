@@ -32,7 +32,6 @@ jobs:
 
     - name: Build and Deploy
       run: |
-        cp -r * .github/workflows/pages/* 
         echo "deploying to pages"
         git add .
         git commit -m "Automated SEO report and index update" || echo "Nothing to commit"
