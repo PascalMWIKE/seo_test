@@ -27,8 +27,13 @@ request = {
 
 response = service.searchanalytics().query(siteUrl=site_url, body=request).execute()
 
+# --- Debug-Ausgabe
+print("Antwort von GSC:", json.dumps(response, indent=2))
+
 # --- In DataFrame umwandeln
 rows = response.get('rows', [])
+print(f"Gefundene Zeilen: {len(rows)}")  # 👈 Sehr wichtig!
+
 data = [{'date': r['keys'][0], 'clicks': r.get('clicks', 0), 'impressions': r.get('impressions', 0)} for r in rows]
 df = pd.DataFrame(data)
 
