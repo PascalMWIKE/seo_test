@@ -67,4 +67,3 @@ conn.close()
 
 print(f"{len(data)} Zeilen erfolgreich upserted.")
 print("DB-Pfad:", os.path.abspath('seo_data.db'))
-print(f"{len(df)} Zeilen erfolgreich gespeichert.")
