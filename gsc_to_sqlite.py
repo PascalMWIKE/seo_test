@@ -27,19 +27,39 @@ request = {
 
 response = service.searchanalytics().query(siteUrl=site_url, body=request).execute()
 
-# --- Debug-Ausgabe
-print("Antwort von GSC:", json.dumps(response, indent=2))
-
 # --- In DataFrame umwandeln
 rows = response.get('rows', [])
-print(f"Gefundene Zeilen: {len(rows)}")  # 👈 Sehr wichtig!
+# Quelle und Typ einfügen
+quelle = 'google_search_console'
+typ = 'date'  # Beispiel, kann erweitert werden
 
-data = [{'date': r['keys'][0], 'clicks': r.get('clicks', 0), 'impressions': r.get('impressions', 0)} for r in rows]
-df = pd.DataFrame(data)
+data = [{'date': r['keys'][0], 'clicks': r.get('clicks', 0), 'impressions': r.get('impressions', 0), 'quelle': quelle, 'typ': typ} for r in rows]
 
-# --- SQLite DB speichern
 conn = sqlite3.connect('seo_data.db')
-df.to_sql('gsc_data', conn, if_exists='replace', index=False)
+cursor = conn.cursor()
+
+# Tabelle mit zusammengesetztem Primärschlüssel (date + quelle + typ)
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS gsc_data (
+    date TEXT,
+    quelle TEXT,
+    typ TEXT,
+    clicks INTEGER,
+    impressions INTEGER,
+    PRIMARY KEY (date, quelle, typ)
+)
+''')
+
+# Upsert für jede Zeile mit zusammengesetztem Schlüssel
+for row in data:
+    cursor.execute('''
+    INSERT INTO gsc_data (date, quelle, typ, clicks, impressions) VALUES (?, ?, ?, ?, ?)
+    ON CONFLICT(date, quelle, typ) DO UPDATE SET
+      clicks=excluded.clicks,
+      impressions=excluded.impressions
+    ''', (row['date'], row['quelle'], row['typ'], row['clicks'], row['impressions']))
+
+conn.commit()
 conn.close()
 
-print(f"{len(df)} Zeilen erfolgreich gespeichert.")
+print(f"{len(data)} Zeilen erfolgreich upserted.")
