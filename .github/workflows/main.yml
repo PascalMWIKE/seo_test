@@ -13,7 +13,6 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
 
-
     - name: 🐍 Set up Python
       uses: actions/setup-python@v4
       with:
@@ -24,14 +23,19 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Pull latest DB if exists
+      run: |
+        git fetch origin main
+        git checkout main -- seo_data.db || echo "No DB file yet"
+
     - name: Print start of GSC_JSON (debug)
       run: echo "${{ secrets.GSC_JSON }}" | cut -c1-100
 
     - name: Write credentials to file
       run: |
-        echo "${{ secrets.GSC_JSON }}" | base64 --decode > creds.json
+        echo "${{ secrets.GSC_JSON }}" > creds.json
 
-    - name: Run gsc_to_sqlite
+    - name: Run gsc_to_sqlite.py
       run: python gsc_to_sqlite.py
 
     - name: 🧪 Run report.py (generate PDF)
@@ -40,27 +44,11 @@ jobs:
     - name: 🛠️ Run generate_html.py (update index.html)
       run: python generate_html.py
 
-    - name: 🐍 Run gsc_to_sqlite.py and check DB
-      run: |
-        python gsc_to_sqlite.py
-        echo "Files in current directory:"
-        ls -la
-        echo "Check for DB file:"
-        if [ -f seo_data.db ]; then
-          echo "DB file exists!"
-          ls -lh seo_data.db
-          realpath seo_data.db
-        else
-          echo "DB file not found!"
-          find . -name "seo_data.db"
-        fi
-
-    - name: ✅ Commit new files (report + index)
+    - name: Commit and push updated DB and reports
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add reports/ index.html
-        git commit -m "Automated SEO report and index update" || echo "Nothing to commit"
-        git push
+        git add seo_data.db reports/ index.html
+        git diff --cached --quiet || (git commit -m "Update SEO data and reports" && git push)
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
