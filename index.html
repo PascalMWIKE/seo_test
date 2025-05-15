@@ -1,11 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-    <meta charset="utf-8">
-    <title>SEO Report</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SEO Berichte</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #222;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    main {
+      max-width: 900px;
+      margin: auto;
+      padding: 2rem;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+      margin-bottom: 2rem;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      margin-bottom: 0.5rem;
+    }
+    a {
+      color: #0066cc;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+    }
+  </style>
 </head>
 <body>
-    <h1>SEO Report</h1>
-    <p>This is a dummy SEO report generated on {{ date }}.</p>
+  <header>
+    <h1>SEO Dashboard Bericht</h1>
+    <p>Letzter Bericht direkt im Überblick</p>
+  </header>
+  <main>
+    <iframe src="{{LATEST_PDF}}"></iframe>
+    <h2>📥 Frühere Berichte zum Download</h2>
+    <ul>
+      {{PDF_LIST}}
+    </ul>
+    {{FOOTER_GAME}}
+  </main>
 </body>
 </html>
