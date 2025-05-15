@@ -29,7 +29,7 @@ jobs:
 
     - name: Write credentials to file
       run: |
-        echo "${{ secrets.GSC_JSON }}" > creds.json
+        echo "${{ secrets.GSC_JSON }}" | base64 --decode > creds.json
 
     - name: Run gsc_to_sqlite
       run: python gsc_to_sqlite.py
