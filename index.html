@@ -1,86 +1,44 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8" />
-  <title>SEO Reports</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f8f8f8;
-      color: #333;
-      margin: 2em;
-    }
-    h1, h2 {
-      text-align: center;
-    }
-    iframe {
-      display: block;
-      margin: 2em auto;
-      width: 80%;
-      height: 700px;
-      border: 2px solid #444;
-      background: #fff;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-      text-align: center;
-    }
-    li {
-      margin: 0.5em 0;
-    }
-    a {
-      text-decoration: none;
-      color: #007acc;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
-    footer {
-      margin-top: 4em;
-      text-align: center;
-    }
-    canvas {
-      display: block;
-      margin: 1em auto;
-      border: 1px solid #000;
-      background: #fff;
-    }
-    #score {
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-  <h1>Aktueller SEO Bericht</h1>
-  <iframe src="reports/seo_report_2025-05-20.pdf"></iframe>
+import os
+from datetime import datetime
 
-  <h2>Alle SEO Berichte zum Download</h2>
-  <ul>
-    <li><a href="reports/seo_report_2025-05-20.pdf" download>seo_report_2025-05-20.pdf</a></li>
-<li><a href="reports/seo_report_2025-05-15.pdf" download>seo_report_2025-05-15.pdf</a></li>
-<li><a href="reports/seo_report_2025-05-14.pdf" download>seo_report_2025-05-14.pdf</a></li>
-<li><a href="reports/seo_report_2025-05-13.pdf" download>seo_report_2025-05-13.pdf</a></li>
-  </ul>
+REPORT_DIR = "reports"
+TEMPLATE_PATH = "templates/index_template.html"
+OUTPUT_PATH = "index.html"
 
-  <footer>
-    
+# Alle PDFs im reports/-Verzeichnis sammeln
+pdf_files = [f for f in os.listdir(REPORT_DIR) if f.endswith(".pdf")]
+
+# Neuester Report nach Änderungsdatum
+latest_pdf = max(pdf_files, key=lambda f: os.path.getmtime(os.path.join(REPORT_DIR, f)))
+
+# HTML-Downloadliste
+download_links = "\n".join(
+    f'<li><a href="{REPORT_DIR}/{f}" download>{f}</a></li>' for f in sorted(pdf_files, reverse=True)
+)
+
+# Dino-Spiel HTML + Script
+footer_game = '''
 <div style="text-align: center; margin-top: 50px;">
   <canvas id="dinoCanvas" width="600" height="150" style="border:1px solid #000"></canvas>
   <div>Punkte: <span id="score">0</span></div>
+  <div id="gameOver" style="color:red; font-weight:bold; display:none;">Game Over! Klick zum Neustart.</div>
 </div>
 <script>
 const canvas = document.getElementById('dinoCanvas');
 const ctx = canvas.getContext('2d');
-let dino = { x: 50, y: 100, width: 30, height: 30 };
+let dino = { x: 50, y: 100, width: 30, height: 30, vy: 0, gravity: 1, jumping: false };
 let letters = [];
 let score = 0;
+let gameOver = false;
 
 function drawDino() {
-  ctx.fillStyle = 'black';
-  ctx.fillRect(dino.x, dino.y, dino.width, dino.height);
-  ctx.fillStyle = 'white';
-  ctx.fillRect(dino.x + 5, dino.y + 5, 20, 10); // Augen als Stilmittel
+  ctx.fillStyle = 'green';
+  ctx.beginPath();
+  ctx.moveTo(dino.x, dino.y);
+  ctx.lineTo(dino.x + 30, dino.y + 15);
+  ctx.lineTo(dino.x, dino.y + 30);
+  ctx.closePath();
+  ctx.fill();
 }
 
 function drawLetters() {
@@ -92,33 +50,85 @@ function drawLetters() {
 }
 
 function update() {
+  if (gameOver) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Bewegung
+  if (dino.jumping) {
+    dino.vy += dino.gravity;
+    dino.y += dino.vy;
+    if (dino.y >= 100) {
+      dino.y = 100;
+      dino.vy = 0;
+      dino.jumping = false;
+    }
+  }
+
   drawDino();
   drawLetters();
 
   letters.forEach(l => l.x -= 2);
   letters = letters.filter(l => l.x > 0);
+
+  // Kollision
+  letters.forEach(l => {
+    if (
+      l.x < dino.x + dino.width &&
+      l.x + 10 > dino.x &&
+      l.y > dino.y &&
+      l.y < dino.y + dino.height
+    ) {
+      if (l.char === 'P') {
+        score++;
+        document.getElementById('score').textContent = score;
+      } else {
+        gameOver = true;
+        document.getElementById('gameOver').style.display = 'block';
+      }
+    }
+  });
+
+  letters = letters.filter(l => !(l.x < dino.x + dino.width && l.x + 10 > dino.x && l.y > dino.y && l.y < dino.y + dino.height && l.char === 'P'));
 }
 
 function spawnLetter() {
   const char = Math.random() < 0.5 ? 'P' : String.fromCharCode(65 + Math.floor(Math.random() * 26));
-  letters.push({ x: canvas.width, y: 110, char });
+  const y = 90 + Math.floor(Math.random() * 40);
+  letters.push({ x: canvas.width, y: y, char });
 }
 
 canvas.addEventListener('click', () => {
-  letters.forEach(l => {
-    if (l.x < dino.x + dino.width && l.x + 10 > dino.x && l.char === 'P') {
-      score++;
-      document.getElementById('score').textContent = score;
-    }
-  });
-  letters = letters.filter(l => l.x >= dino.x + dino.width || l.char !== 'P');
+  if (gameOver) {
+    letters = [];
+    score = 0;
+    dino.y = 100;
+    dino.vy = 0;
+    dino.jumping = false;
+    gameOver = false;
+    document.getElementById('score').textContent = score;
+    document.getElementById('gameOver').style.display = 'none';
+  } else if (!dino.jumping) {
+    dino.vy = -12;
+    dino.jumping = true;
+  }
 });
 
 setInterval(update, 30);
 setInterval(spawnLetter, 1000);
 </script>
+'''
 
-  </footer>
-</body>
-</html>
+# HTML-Template einlesen
+with open(TEMPLATE_PATH, "r") as f:
+    template = f.read()
+
+# Platzhalter ersetzen
+html = template.replace("{{LATEST_PDF}}", f"{REPORT_DIR}/{latest_pdf}")
+html = html.replace("{{PDF_LIST}}", download_links)
+html = html.replace("{{FOOTER_GAME}}", footer_game)
+
+# Ausgabe speichern
+with open(OUTPUT_PATH, "w") as f:
+    f.write(html)
+
+print(f"index.html erfolgreich erstellt. Neuester Bericht: {latest_pdf}")
