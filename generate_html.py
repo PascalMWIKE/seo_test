@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 
 REPORT_DIR = "reports"
-TEMPLATE_PATH = "templates/report_template.html"
+TEMPLATE_PATH = "templates/index_template.html"
 OUTPUT_PATH = "index.html"
 
 # Alle PDFs im reports/-Verzeichnis sammeln
@@ -19,21 +19,31 @@ download_links = "\n".join(
 # Dino-Spiel HTML + Script
 footer_game = '''
 <div style="text-align: center; margin-top: 50px;">
+  <h3>Schnapp dir alle PP!</h3>
   <canvas id="dinoCanvas" width="600" height="150" style="border:1px solid #000"></canvas>
   <div>Punkte: <span id="score">0</span></div>
+  <div id="gameOver" style="color:red; font-weight:bold; display:none; cursor:pointer;">Game Over! Klick zum Neustart.</div>
 </div>
 <script>
 const canvas = document.getElementById('dinoCanvas');
 const ctx = canvas.getContext('2d');
-let dino = { x: 50, y: 100, width: 30, height: 30 };
+let dino = { x: 50, y: 100, width: 20, height: 30, vy: 0, gravity: 1, jumping: false };
 let letters = [];
 let score = 0;
+let gameOver = false;
 
 function drawDino() {
+  ctx.fillStyle = 'green';
+  ctx.fillRect(dino.x, dino.y, dino.width, dino.height); // Körper
+  ctx.fillRect(dino.x, dino.y + dino.height, 5, 5); // Bein links
+  ctx.fillRect(dino.x + 15, dino.y + dino.height, 5, 5); // Bein rechts
+  ctx.fillRect(dino.x - 5, dino.y + 10, 5, 5); // Arm links
+  ctx.fillRect(dino.x + dino.width, dino.y + 10, 5, 5); // Arm rechts
+  ctx.fillRect(dino.x - 5, dino.y + 15, 5, 5); // Schwanz
   ctx.fillStyle = 'black';
-  ctx.fillRect(dino.x, dino.y, dino.width, dino.height);
-  ctx.fillStyle = 'white';
-  ctx.fillRect(dino.x + 5, dino.y + 5, 20, 10); // Augen als Stilmittel
+  ctx.beginPath();
+  ctx.arc(dino.x + dino.width - 5, dino.y + 5, 2, 0, Math.PI * 2); // Auge
+  ctx.fill();
 }
 
 function drawLetters() {
@@ -45,31 +55,79 @@ function drawLetters() {
 }
 
 function update() {
+  if (gameOver) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (dino.jumping) {
+    dino.vy += dino.gravity;
+    dino.y += dino.vy;
+    if (dino.y >= 100) {
+      dino.y = 100;
+      dino.vy = 0;
+      dino.jumping = false;
+    }
+  }
+
   drawDino();
   drawLetters();
 
   letters.forEach(l => l.x -= 2);
   letters = letters.filter(l => l.x > 0);
+
+  for (let i = 0; i < letters.length - 1; i++) {
+    const l1 = letters[i];
+    const l2 = letters[i + 1];
+    if (
+      l1.char === 'P' &&
+      l2.char === 'P' &&
+      Math.abs(l1.x - l2.x) < 15 &&
+      Math.abs(l1.y - l2.y) < 10 &&
+      l1.x < dino.x + dino.width &&
+      l1.x + 10 > dino.x &&
+      l1.y > dino.y &&
+      l1.y < dino.y + dino.height
+    ) {
+      score++;
+      document.getElementById('score').textContent = score;
+      letters.splice(i, 2);
+      break;
+    } else if (
+      l1.x < dino.x + dino.width &&
+      l1.x + 10 > dino.x &&
+      l1.y > dino.y &&
+      l1.y < dino.y + dino.height
+    ) {
+      gameOver = true;
+      document.getElementById('gameOver').style.display = 'block';
+    }
+  }
 }
 
 function spawnLetter() {
-  const char = Math.random() < 0.5 ? 'P' : String.fromCharCode(65 + Math.floor(Math.random() * 26));
-  letters.push({ x: canvas.width, y: 110, char });
+  const options = ['P', 'P', 'A', 'B', 'C', 'D', 'E', 'F'];
+  const char = options[Math.floor(Math.random() * options.length)];
+  const y = 60 + Math.floor(Math.random() * 60);
+  letters.push({ x: canvas.width, y: y, char });
 }
 
 canvas.addEventListener('click', () => {
-  letters.forEach(l => {
-    if (l.x < dino.x + dino.width && l.x + 10 > dino.x && l.char === 'P') {
-      score++;
-      document.getElementById('score').textContent = score;
-    }
-  });
-  letters = letters.filter(l => l.x >= dino.x + dino.width || l.char !== 'P');
+  if (gameOver) {
+    letters = [];
+    score = 0;
+    dino.y = 100;
+    dino.vy = 0;
+    dino.jumping = false;
+    gameOver = false;
+    document.getElementById('score').textContent = score;
+    document.getElementById('gameOver').style.display = 'none';
+  } else if (!dino.jumping) {
+    dino.vy = -12;
+    dino.jumping = true;
+  }
 });
 
 setInterval(update, 30);
-setInterval(spawnLetter, 1000);
+setInterval(spawnLetter, 700);
 </script>
 '''
 
