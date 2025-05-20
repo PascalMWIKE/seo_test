@@ -5,47 +5,120 @@
   <title>SEO Reports</title>
   <style>
     body {
-      font-family: sans-serif;
-      margin: 2rem;
-      background-color: #f4f4f4;
+      font-family: Arial, sans-serif;
+      background: #f8f8f8;
       color: #333;
+      margin: 2em;
     }
-    h1 {
+    h1, h2 {
       text-align: center;
     }
     iframe {
       display: block;
-      margin: 2rem auto;
-      border: 2px solid #333;
-      width: 90%;
-      height: 600px;
+      margin: 2em auto;
+      width: 80%;
+      height: 700px;
+      border: 2px solid #444;
+      background: #fff;
     }
     ul {
       list-style: none;
-      padding-left: 0;
+      padding: 0;
       text-align: center;
     }
     li {
-      margin: 0.5rem 0;
+      margin: 0.5em 0;
+    }
+    a {
+      text-decoration: none;
+      color: #007acc;
+    }
+    a:hover {
+      text-decoration: underline;
     }
     footer {
-      margin-top: 4rem;
+      margin-top: 4em;
       text-align: center;
+    }
+    canvas {
+      display: block;
+      margin: 1em auto;
+      border: 1px solid #000;
+      background: #fff;
+    }
+    #score {
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h1>SEO Reports</h1>
+  <h1>Aktueller SEO Bericht</h1>
+  <iframe src="reports/seo_report_2025-05-20.pdf"></iframe>
 
-  <!-- Aktueller Bericht eingebettet -->
-  <iframe src="{{LATEST_PDF}}"></iframe>
-
-  <h2>Alle Berichte herunterladen</h2>
+  <h2>Alle SEO Berichte zum Download</h2>
   <ul>
-    {{PDF_LIST}}
+    <li><a href="reports/seo_report_2025-05-20.pdf" download>seo_report_2025-05-20.pdf</a></li>
+<li><a href="reports/seo_report_2025-05-15.pdf" download>seo_report_2025-05-15.pdf</a></li>
+<li><a href="reports/seo_report_2025-05-14.pdf" download>seo_report_2025-05-14.pdf</a></li>
+<li><a href="reports/seo_report_2025-05-13.pdf" download>seo_report_2025-05-13.pdf</a></li>
   </ul>
 
-  <!-- Dino-Spiel im Footer -->
-  {{FOOTER_GAME}}
+  <footer>
+    
+<div style="text-align: center; margin-top: 50px;">
+  <canvas id="dinoCanvas" width="600" height="150" style="border:1px solid #000"></canvas>
+  <div>Punkte: <span id="score">0</span></div>
+</div>
+<script>
+const canvas = document.getElementById('dinoCanvas');
+const ctx = canvas.getContext('2d');
+let dino = { x: 50, y: 100, width: 30, height: 30 };
+let letters = [];
+let score = 0;
+
+function drawDino() {
+  ctx.fillStyle = 'black';
+  ctx.fillRect(dino.x, dino.y, dino.width, dino.height);
+  ctx.fillStyle = 'white';
+  ctx.fillRect(dino.x + 5, dino.y + 5, 20, 10); // Augen als Stilmittel
+}
+
+function drawLetters() {
+  ctx.fillStyle = 'black';
+  letters.forEach(l => {
+    ctx.font = '20px monospace';
+    ctx.fillText(l.char, l.x, l.y);
+  });
+}
+
+function update() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawDino();
+  drawLetters();
+
+  letters.forEach(l => l.x -= 2);
+  letters = letters.filter(l => l.x > 0);
+}
+
+function spawnLetter() {
+  const char = Math.random() < 0.5 ? 'P' : String.fromCharCode(65 + Math.floor(Math.random() * 26));
+  letters.push({ x: canvas.width, y: 110, char });
+}
+
+canvas.addEventListener('click', () => {
+  letters.forEach(l => {
+    if (l.x < dino.x + dino.width && l.x + 10 > dino.x && l.char === 'P') {
+      score++;
+      document.getElementById('score').textContent = score;
+    }
+  });
+  letters = letters.filter(l => l.x >= dino.x + dino.width || l.char !== 'P');
+});
+
+setInterval(update, 30);
+setInterval(spawnLetter, 1000);
+</script>
+
+  </footer>
 </body>
 </html>
