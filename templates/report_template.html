@@ -1,64 +1,94 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <title>SEO Reports</title>
+  <meta charset="UTF-8">
+  <title>SEO Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f8f8f8;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(145deg, #f0f0f5, #d8d8de);
       color: #333;
-      margin: 2em;
     }
-    h1, h2 {
+
+    header {
       text-align: center;
+      padding: 2rem 1rem;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
     }
+
+    header h1 {
+      font-size: 2.5rem;
+      margin: 0;
+      letter-spacing: -0.03em;
+    }
+
+    section {
+      max-width: 800px;
+      margin: 3rem auto;
+      background: #ffffffcc;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
     iframe {
-      display: block;
-      margin: 2em auto;
-      width: 80%;
-      height: 700px;
-      border: 2px solid #444;
-      background: #fff;
+      width: 100%;
+      height: 600px;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-top: 3rem;
+      margin-bottom: 1rem;
+    }
+
     ul {
       list-style: none;
       padding: 0;
-      text-align: center;
     }
+
     li {
-      margin: 0.5em 0;
+      margin: 0.5rem 0;
     }
+
     a {
       text-decoration: none;
-      color: #007acc;
+      color: #007aff;
+      font-weight: 500;
     }
+
     a:hover {
       text-decoration: underline;
     }
+
     footer {
-      margin-top: 4em;
+      margin-top: 4rem;
+      padding: 2rem;
       text-align: center;
-    }
-    canvas {
-      display: block;
-      margin: 1em auto;
-      border: 1px solid #000;
-      background: #fff;
-    }
-    #score {
-      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h1>Aktueller SEO Bericht</h1>
-  <iframe src="{{LATEST_PDF}}"></iframe>
+  <header>
+    <h1>SEO Dashboard</h1>
+    <p>Letzter Bericht &amp; Downloadarchiv</p>
+  </header>
 
-  <h2>Alle SEO Berichte zum Download</h2>
-  <ul>
-    {{PDF_LIST}}
-  </ul>
+  <section>
+    <iframe src="{{LATEST_PDF}}"></iframe>
+
+    <h2>Alle Berichte herunterladen</h2>
+    <ul>
+      {{PDF_LIST}}
+    </ul>
+  </section>
 
   <footer>
     {{FOOTER_GAME}}
