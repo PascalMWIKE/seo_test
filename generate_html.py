@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 
 REPORT_DIR = "reports"
-TEMPLATE_PATH = "templates/index_template.html"
+TEMPLATE_PATH = "templates/reports_template.html"
 OUTPUT_PATH = "index.html"
 
 # Alle PDFs im reports/-Verzeichnis sammeln
