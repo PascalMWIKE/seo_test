@@ -19,6 +19,7 @@ download_links = "\n".join(
 # Dino-Spiel HTML + Script
 footer_game = '''
 <div style="text-align: center; margin-top: 50px;">
+  <h3>Schnapp dir alle PP!</h3>
   <canvas id="dinoCanvas" width="600" height="150" style="border:1px solid #000"></canvas>
   <div>Punkte: <span id="score">0</span></div>
   <div id="gameOver" style="color:red; font-weight:bold; display:none;">Game Over! Klick zum Neustart.</div>
@@ -26,18 +27,18 @@ footer_game = '''
 <script>
 const canvas = document.getElementById('dinoCanvas');
 const ctx = canvas.getContext('2d');
-let dino = { x: 50, y: 100, width: 30, height: 30, vy: 0, gravity: 1, jumping: false };
+let dino = { x: 50, y: 100, width: 20, height: 30, vy: 0, gravity: 1, jumping: false };
 let letters = [];
 let score = 0;
 let gameOver = false;
 
 function drawDino() {
   ctx.fillStyle = 'green';
-  ctx.beginPath();
-  ctx.moveTo(dino.x, dino.y);
-  ctx.lineTo(dino.x + 30, dino.y + 15);
-  ctx.lineTo(dino.x, dino.y + 30);
-  ctx.closePath();
+  ctx.fillRect(dino.x, dino.y, dino.width, dino.height); // body
+  ctx.fillRect(dino.x - 5, dino.y + 5, 5, 10); // tail
+  ctx.fillStyle = 'black';
+  ctx.beginPath(); // eye
+  ctx.arc(dino.x + dino.width - 5, dino.y + 5, 2, 0, Math.PI * 2);
   ctx.fill();
 }
 
@@ -53,7 +54,6 @@ function update() {
   if (gameOver) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Bewegung
   if (dino.jumping) {
     dino.vy += dino.gravity;
     dino.y += dino.vy;
@@ -70,7 +70,6 @@ function update() {
   letters.forEach(l => l.x -= 2);
   letters = letters.filter(l => l.x > 0);
 
-  // Kollision
   letters.forEach(l => {
     if (
       l.x < dino.x + dino.width &&
@@ -93,7 +92,7 @@ function update() {
 
 function spawnLetter() {
   const char = Math.random() < 0.5 ? 'P' : String.fromCharCode(65 + Math.floor(Math.random() * 26));
-  const y = 90 + Math.floor(Math.random() * 40);
+  const y = 70 + Math.floor(Math.random() * 60);
   letters.push({ x: canvas.width, y: y, char });
 }
 
@@ -114,7 +113,7 @@ canvas.addEventListener('click', () => {
 });
 
 setInterval(update, 30);
-setInterval(spawnLetter, 1000);
+setInterval(spawnLetter, 1500);
 </script>
 '''
 
