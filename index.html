@@ -211,7 +211,7 @@ canvas.addEventListener('click', () => {
     document.getElementById('score').textContent = score;
     document.getElementById('gameOver').style.display = 'none';
   } else if (!dino.jumping) {
-    dino.vy = -12;
+    dino.vy = -15;
     dino.jumping = true;
   }
 });
@@ -219,7 +219,6 @@ canvas.addEventListener('click', () => {
 setInterval(update, 30);
 setInterval(spawnLetter, 1000);
 </script>
-
   </footer>
 </body>
 </html>
