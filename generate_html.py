@@ -1,34 +1,46 @@
 import os
+from datetime import datetime
 
 TEMPLATE_PATH = "templates/index_template.html"
 OUTPUT_PATH = "index.html"
-REPORT_DIR = "reports"
+REPORTS_FOLDER = "reports"
+FOOTER_GAME_PATH = "templates/footer_game.html"
 
-# Aktuelle PDF-Dateien im Report-Ordner sammeln
-pdf_files = [f for f in os.listdir(REPORT_DIR) if f.endswith(".pdf")]
-pdf_files.sort(key=lambda f: os.path.getmtime(os.path.join(REPORT_DIR, f)), reverse=True)
-latest_pdf = pdf_files[0] if pdf_files else ""
+def load_template(path):
+    with open(path, "r", encoding="utf-8") as file:
+        return file.read()
 
-# Downloadliste erstellen
-download_links = "\n".join(
-    f'<li><a href="{REPORT_DIR}/{f}" download>{f}</a></li>' for f in pdf_files
-)
+def list_reports(folder):
+    pdf_files = sorted(
+        [f for f in os.listdir(folder) if f.endswith(".pdf")],
+        reverse=True
+    )
+    links = ""
+    for pdf in pdf_files:
+        date_label = datetime.strptime(pdf.split("_")[-1].replace(".pdf", ""), "%Y-%m-%d").strftime("%d.%m.%Y")
+        links += f'<li><a href="{folder}/{pdf}" download>{date_label}</a></li>\n'
+    return links, f"{folder}/{pdf_files[0]}" if pdf_files else ""
 
-# Dino-Spiel (ausgelagert oder inline)
-with open("templates/footer_game_snippet.html", "r", encoding="utf-8") as f:
-    footer_game = f.read()
+def main():
+    # Lade das Haupttemplate
+    template = load_template(TEMPLATE_PATH)
 
-# Template einlesen
-with open(TEMPLATE_PATH, "r", encoding="utf-8") as f:
-    template = f.read()
+    # Lade das Footer-Spiel
+    footer_game = load_template(FOOTER_GAME_PATH) if os.path.exists(FOOTER_GAME_PATH) else ""
 
-# Platzhalter ersetzen
-html = template.replace("{{LATEST_PDF_PATH}}", f"{REPORT_DIR}/{latest_pdf}")
-html = html.replace("{{DOWNLOAD_LINKS}}", download_links)
-html = html.replace("{{FOOTER_GAME}}", footer_game)
+    # Berichte einlesen
+    download_links, latest_pdf = list_reports(REPORTS_FOLDER)
 
-# Datei schreiben
-with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
-    f.write(html)
+    # Ersetze Platzhalter
+    html_output = template.replace("{{LATEST_PDF_PATH}}", latest_pdf)
+    html_output = html_output.replace("{{DOWNLOAD_LINKS}}", download_links)
+    html_output = html_output.replace("{{FOOTER_GAME}}", footer_game)
 
-print(f"✅ index.html erstellt mit {latest_pdf} als neuestem Bericht.")
+    # Speichere finale index.html
+    with open(OUTPUT_PATH, "w", encoding="utf-8") as file:
+        file.write(html_output)
+
+    print("✅ index.html wurde erfolgreich generiert.")
+
+if __name__ == "__main__":
+    main()
