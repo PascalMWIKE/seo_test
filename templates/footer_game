@@ -1,1 +1,315 @@
+<footer>
+  <style>
+    /* Footer-Styling */
+    #game-container {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      width: 300px;
+      height: 100px;
+      background: #222;
+      border-radius: 10px;
+      overflow: hidden;
+      font-family: monospace;
+      color: white;
+      user-select: none;
+      z-index: 1000;
+    }
+    #crocodile {
+      position: absolute;
+      bottom: 10px;
+      left: 20px;
+      width: 60px;
+      height: 60px;
+      background: #4CAF50;
+      border-radius: 20px 20px 10px 10px;
+      transition: bottom 0.1s;
+    }
+    .letter {
+      position: absolute;
+      top: 0;
+      font-size: 16px;
+      font-weight: bold;
+      color: #FFC107;
+      cursor: default;
+      user-select: none;
+    }
+    #scoreboard {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      font-size: 14px;
+      color: #eee;
+    }
+    #game-over {
+      position: absolute;
+      top: 35px;
+      left: 10px;
+      right: 10px;
+      color: #f44336;
+      font-weight: bold;
+      font-size: 16px;
+      display: none;
+      text-align: center;
+    }
+    #highscore-entry {
+      display: none;
+      text-align: center;
+      margin-top: 5px;
+    }
+    #highscore-entry input {
+      padding: 3px 5px;
+      font-size: 14px;
+      border-radius: 3px;
+      border: none;
+    }
+    #highscore-entry button {
+      margin-left: 5px;
+      padding: 3px 8px;
+      font-size: 14px;
+      border-radius: 3px;
+      border: none;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+
+  <div id="game-container" tabindex="0">
+    <div id="crocodile"></div>
+    <div id="scoreboard">Score: 0</div>
+    <div id="game-over">Game Over!</div>
+    <div id="highscore-entry">
+      <span>New Highscore! Enter your name:</span>
+      <input type="text" id="player-name" maxlength="10" autofocus />
+      <button id="save-score-btn">Save</button>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const container = document.getElementById('game-container');
+      const croc = document.getElementById('crocodile');
+      const scoreboard = document.getElementById('scoreboard');
+      const gameOverText = document.getElementById('game-over');
+      const highscoreEntry = document.getElementById('highscore-entry');
+      const playerNameInput = document.getElementById('player-name');
+      const saveScoreBtn = document.getElementById('save-score-btn');
+
+      const CROC_WIDTH = 60;
+      const CROC_HEIGHT = 60;
+      const GAME_WIDTH = 300;
+      const GAME_HEIGHT = 100;
+
+      let crocBottom = 10; // px from bottom
+      let velocity = 0;
+      let gravity = -1.5;
+      let jumpVelocity = 25;
+
+      let letters = [];
+      let letterSpeed = 4;
+      let letterInterval = 1500; // ms between letters
+      let lastLetterTime = 0;
+
+      let score = 0;
+      let gameOver = false;
+
+      // Highscore List (top 3) loaded from localStorage
+      let highscoreList = JSON.parse(localStorage.getItem('croc_highscores') || '[]');
+
+      function createLetter() {
+        const letterEl = document.createElement('div');
+        letterEl.classList.add('letter');
+        // 50% chance to spawn "P" or random letter except "P"
+        let isP = Math.random() < 0.5;
+        if (isP) {
+          // Spawn either single "P" or double "PP"
+          if (Math.random() < 0.5) {
+            letterEl.textContent = 'PP';
+          } else {
+            letterEl.textContent = 'P';
+          }
+        } else {
+          // Random letter except P
+          const alphabet = 'ABCDEFGHJKLMNOQRSTUVWXYZ'; // No P
+          letterEl.textContent = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+        }
+        // Set vertical position randomly within game container height minus letter height
+        let topPos = Math.floor(Math.random() * (GAME_HEIGHT - 20)) + 10;
+        letterEl.style.top = topPos + 'px';
+        letterEl.style.right = '-40px';
+
+        container.appendChild(letterEl);
+
+        letters.push({
+          el: letterEl,
+          width: letterEl.offsetWidth || 16,
+          height: letterEl.offsetHeight || 20,
+          x: GAME_WIDTH,
+          y: topPos,
+          text: letterEl.textContent
+        });
+      }
+
+      function updateLetters() {
+        for (let i = letters.length -1; i >= 0; i--) {
+          const letter = letters[i];
+          letter.x -= letterSpeed;
+          if (letter.x + letter.width < 0) {
+            // Letter out of screen, remove it
+            container.removeChild(letter.el);
+            letters.splice(i, 1);
+            continue;
+          }
+          letter.el.style.right = (GAME_WIDTH - letter.x) + 'px';
+        }
+      }
+
+      function checkCollision() {
+        // Croc position (fixed left: 20px)
+        let crocX = 20;
+        let crocY = crocBottom;
+        let crocRight = crocX + CROC_WIDTH;
+        let crocTop = crocY + CROC_HEIGHT;
+
+        for (let i = letters.length -1; i >= 0; i--) {
+          const letter = letters[i];
+          let letterX = letter.x;
+          let letterY = letter.y;
+          let letterRight = letterX + letter.width;
+          let letterBottom = letterY + 20;
+
+          // Check bounding box collision (simplified)
+          let horizontalOverlap = !(letterRight < crocX || letterX > crocRight);
+          let verticalOverlap = !(letterBottom < crocY || letterY > crocTop);
+
+          if (horizontalOverlap && verticalOverlap) {
+            // Collision!
+            if (letter.text === 'P' || letter.text === 'PP') {
+              // Good catch, add points: 1 point per letter P (so "PP" = 2 points)
+              score += letter.text.length;
+              updateScore();
+              // Remove letter
+              container.removeChild(letter.el);
+              letters.splice(i,1);
+            } else {
+              // Bad letter => Game over
+              endGame();
+              break;
+            }
+          }
+        }
+      }
+
+      function updateScore() {
+        scoreboard.textContent = 'Score: ' + score;
+      }
+
+      function endGame() {
+        gameOver = true;
+        gameOverText.style.display = 'block';
+        highscoreEntry.style.display = 'none';
+
+        // Check if score is in top 3 highscores
+        if (isHighscore(score)) {
+          highscoreEntry.style.display = 'block';
+          playerNameInput.value = '';
+          playerNameInput.focus();
+        }
+      }
+
+      function isHighscore(score) {
+        if (highscoreList.length < 3) return true;
+        return score > highscoreList[highscoreList.length -1].score;
+      }
+
+      function saveHighscore() {
+        let name = playerNameInput.value.trim() || 'Anon';
+        highscoreList.push({name: name, score: score});
+        // Sort descending
+        highscoreList.sort((a,b) => b.score - a.score);
+        if (highscoreList.length > 3) highscoreList.pop();
+        localStorage.setItem('croc_highscores', JSON.stringify(highscoreList));
+        highscoreEntry.style.display = 'none';
+        gameOverText.textContent = 'Thanks! Refresh to play again.';
+      }
+
+      function resetGame() {
+        // Remove all letters
+        letters.forEach(l => container.removeChild(l.el));
+        letters = [];
+        score = 0;
+        updateScore();
+        gameOver = false;
+        gameOverText.style.display = 'none';
+        highscoreEntry.style.display = 'none';
+        crocBottom = 10;
+        velocity = 0;
+        lastLetterTime = 0;
+      }
+
+      function gameLoop(timestamp) {
+        if (!lastLetterTime) lastLetterTime = timestamp;
+
+        if (!gameOver) {
+          // Jump physics
+          if (velocity !== 0 || crocBottom > 10) {
+            velocity += gravity;
+            crocBottom += velocity;
+            if (crocBottom < 10) {
+              crocBottom = 10;
+              velocity = 0;
+            }
+            croc.style.bottom = crocBottom + 'px';
+          }
+
+          // Add letters at intervals
+          if (timestamp - lastLetterTime > letterInterval) {
+            createLetter();
+            lastLetterTime = timestamp;
+          }
+
+          updateLetters();
+          checkCollision();
+        }
+        requestAnimationFrame(gameLoop);
+      }
+
+      function jump() {
+        if (gameOver) return;
+        if (crocBottom === 10) {
+          velocity = jumpVelocity;
+        }
+      }
+
+      // Controls: spacebar and mouse click to jump
+      container.addEventListener('keydown', e => {
+        if (e.code === 'Space') {
+          e.preventDefault();
+          jump();
+        }
+      });
+      container.addEventListener('click', () => {
+        jump();
+      });
+
+      saveScoreBtn.addEventListener('click', () => {
+        saveHighscore();
+      });
+
+      // Also save on Enter key inside input
+      playerNameInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          saveHighscore();
+        }
+      });
+
+      // Focus container so it can catch keyboard events
+      container.focus();
+
+      // Start game loop
+      requestAnimationFrame(gameLoop);
+    })();
+  </script>
+</footer>
 
